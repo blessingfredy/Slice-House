@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<nav th:fragment="siteHeader">
+    <div class="logo" onclick="window.location.href='/'">SLICE HOUSE</div>
+
+    <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/menu">Menu</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/contact">Contact</a></li>
+
+        <li>
+            <a href="/cart" class="cart-icon">
+                <svg class="cart-svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+               <span class="cart-white">Cart</span>
+                <span class="cart-badge"
+                      th:if="${cartCount > 0}"
+                      th:text="${cartCount}">0</span>
+            </a>
+        </li>
+
+        <!-- Auth buttons -->
+        <li sec:authorize="isAnonymous()">
+            <a href="/login">Login</a>
+        </li>
+
+        <li sec:authorize="isAuthenticated()">
+            <a href="/logout">Logout</a>
+        </li>
+    </ul>
+
+</nav>
+
+</body>
+</html>

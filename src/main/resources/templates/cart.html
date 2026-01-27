@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart - Slice House</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #fff;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            right: -20%;
+            width: 80%;
+            height: 150%;
+            background: radial-gradient(circle, rgba(255, 107, 53, 0.08) 0%, transparent 70%);
+            animation: float 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-30px) scale(1.05); }
+        }
+
+        /* Navbar */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1.2rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 107, 53, 0.2);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            cursor: pointer;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #ff6b35;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 120px 5% 3rem;
+        }
+
+        .cart-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cart-header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #fff 0%, #ff6b35 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cart-header p {
+            color: #999;
+            font-size: 1.1rem;
+        }
+
+        .cart-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            animation: fadeIn 1s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+     
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+
+        .item-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 15px;
+            object-fit: cover;
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .item-price {
+            color: #ff6b35;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .item-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .quantity-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+        }
+
+        .quantity-label {
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .quantity-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .item-subtotal {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            min-width: 100px;
+            text-align: right;
+        }
+
+        .btn-remove {
+            background: rgba(255, 107, 53, 0.2);
+            border: 2px solid #ff6b35;
+            color: #ff6b35;
+            padding: 0.6rem 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .btn-remove:hover {
+            background: #ff6b35;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        /* Order Summary */
+        .order-summary {
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            padding: 2rem;
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+
+        .summary-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #fff;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: #999;
+        }
+
+        .summary-row:last-of-type {
+            border-bottom: 2px solid rgba(255, 107, 53, 0.3);
+        }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 1.5rem 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .summary-total .amount {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn-checkout {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: #fff;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .btn-checkout:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.5);
+        }
+
+        .btn-continue {
+            width: 100%;
+            padding: 1rem;
+            background: transparent;
+            color: #ff6b35;
+            border: 2px solid #ff6b35;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .btn-continue:hover {
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        /* Empty Cart State */
+        .empty-cart {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+        }
+
+        .empty-cart-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.5;
+        }
+
+        .empty-cart h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        .empty-cart p {
+            color: #999;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+        
+	.qty-btn {
+		    display: inline-flex;
+		    align-items: center;
+		    justify-content: center;
+		    width: 28px;
+		    height: 28px;
+		    background: linear-gradient(135deg, #ff6b35, #f7931e);
+		    color: #fff;
+		    border-radius: 6px;
+		    text-decoration: none;
+		    font-weight: 700;
+		    font-size: 1.1rem;
+		    transition: all 0.3s ease;
+		}
+		
+		.qty-btn:hover {
+		    transform: scale(1.1);
+		    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.5);
+		}
+        
+
+        @media (max-width: 968px) {
+            .cart-content {
+                grid-template-columns: 1fr;
+            }
+
+            .order-summary {
+                position: static;
+            }
+
+            .cart-item {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .item-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .item-subtotal {
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 100px 4% 2rem;
+            }
+
+            .cart-header h1 {
+                font-size: 2rem;
+            }
+
+            .item-image {
+                width: 80px;
+                height: 80px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+</head>
+<body>
+
+<div th:replace="fragments/header :: siteHeader"></div>
+
+
+<div class="container">
+    <div class="cart-header">
+        <h1>Your Cart</h1>
+        <p>Review your delicious selections</p>
+    </div>
+
+    <div th:if="${cartItems.size() > 0}" class="cart-content">
+        <div class="cart-items">
+            <div class="cart-item" th:each="item : ${cartItems}">
+                <img th:if="${item.pizza.imageName != null}"
+                     th:src="@{'/uploads/' + ${item.pizza.imageName}}"
+                     th:alt="${item.pizza.name}"
+                     class="item-image" />
+                <div th:if="${item.pizza.imageName == null}" class="item-image" style="display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">
+                    🍕
+                </div>
+                
+                <div class="item-details">
+                    <div class="item-name" th:text="${item.pizza.name}">Margherita</div>
+                    <div class="item-price">₹<span th:text="${item.pizza.price}">12.99</span> each</div>
+                </div>
+
+                <div class="item-actions">
+                   <div class="quantity-info">
+					    <span class="quantity-label">Qty:</span>
+					
+					    <a th:href="@{/cart/increase/{id}(id=${item.pizza.id})}"
+					       class="qty-btn">+</a>
+					         <span class="quantity-value" th:text="${item.quantity}">1</span>
+					   	<a th:href="@{/cart/decrease/{id}(id=${item.pizza.id})}"
+   							class="qty-btn">−</a>				  
+					</div>
+                    <div class="item-subtotal">
+                        ₹<span th:text="${#numbers.formatDecimal(item.pizza.price * item.quantity, 1, 2)}">12.99</span>
+                    </div>
+                    <a th:href="@{/cart/remove/{id}(id=${item.pizza.id})}" class="btn-remove">
+                        Remove
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="order-summary">
+            <h2 class="summary-title">Order Summary</h2>
+            
+          <div class="summary-row">
+		    <span>Subtotal</span>
+		    <span>₹<span th:text="${#numbers.formatDecimal(subtotal, 1, 2)}">0.00</span></span>
+		</div>
+		
+		<div class="summary-row">
+		    <span>Delivery Fee</span>
+		    <span>₹<span th:text="${#numbers.formatDecimal(deliveryFee, 1, 2)}">20.00</span></span>
+		</div>
+		
+		<div class="summary-row">
+		    <span>Tax (8%)</span>
+		    <span>₹<span th:text="${#numbers.formatDecimal(tax, 1, 2)}">0.00</span></span>
+		</div>
+		
+		<div class="summary-total">
+		    <span>Total</span>
+		    <span class="amount">
+		        ₹<span th:text="${#numbers.formatDecimal(grandTotal, 1, 2)}">0.00</span>
+		    </span>
+		</div>
+
+            <a href="/checkout" class="btn-checkout">Proceed to Checkout</a>
+            <a href="/menu" class="btn-continue">Continue Shopping</a>
+        </div>
+    </div>
+
+    <div th:if="${cartItems.size() == 0}" class="empty-cart">
+        <div class="empty-cart-icon">🛒</div>
+        <h2>Your cart is empty</h2>
+        <p>Looks like you haven't added any pizzas yet</p>
+        <a href="/menu" class="btn-checkout" style="max-width: 300px; margin: 0 auto;">Browse Our Menu</a>
+    </div>
+</div>
+
+<div th:replace="fragments/header :: siteHeader"></div>
+
+
+</body>
+</html>

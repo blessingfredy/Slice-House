@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu - Slice House</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #fff;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            right: -20%;
+            width: 80%;
+            height: 150%;
+            background: radial-gradient(circle, rgba(255, 107, 53, 0.08) 0%, transparent 70%);
+            animation: float 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-30px) scale(1.05); }
+        }
+
+        /* Navbar */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1.2rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 107, 53, 0.2);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            cursor: pointer;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #ff6b35;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .cart-icon {
+            position: relative;
+            padding: 0.6rem 1.2rem;
+            background: rgba(255, 107, 53, 0.2);
+            border: 2px solid #ff6b35;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .cart-icon:hover {
+            background: #ff6b35;
+            transform: translateY(-2px);
+        }
+
+        /* Main content */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 120px 5% 3rem;
+        }
+
+        .menu-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .menu-header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #fff 0%, #ff6b35 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .menu-header p {
+            color: #999;
+            font-size: 1.1rem;
+        }
+
+        .filter-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.8rem 2.5rem 0.8rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 107, 53, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            border-color: #ff6b35;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            animation: fadeIn 1s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .pizza-card {
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            transition: all 0.4s ease;
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pizza-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(255, 107, 53, 0.3);
+            border-color: #ff6b35;
+        }
+
+        .pizza-image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 220px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .pizza-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .pizza-card:hover .pizza-image {
+            transform: scale(1.1);
+        }
+
+        .no-image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 107, 53, 0.1);
+            font-size: 4rem;
+        }
+
+        .pizza-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        
+        .status-available {
+            background: linear-gradient(135deg, #15f736, #025f0b);
+            color: #fff;
+        }
+
+        .status-unavailable {
+            background: linear-gradient(135deg, #f01101, #4e0b06);
+    		color: #fff;
+        }
+
+        .pizza-content {
+            padding: 1.5rem;
+        }
+
+        .pizza-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            color: #fff;
+        }
+
+        .pizza-desc {
+            color: #999;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .pizza-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .pizza-price {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn-add {
+            padding: 0.7rem 0.7rem;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: #fff;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.5);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+	 .toast {
+	    position: fixed;
+	    bottom: 30px;
+	    right: 30px;
+	    background: linear-gradient(135deg, #ff6b35, #f7931e);
+	    color: #fff;
+	    padding: 1rem 1.5rem;
+	    border-radius: 12px;
+	    font-weight: 600;
+	    box-shadow: 0 10px 30px rgba(255, 107, 53, 0.5);
+	    animation: slideIn 0.5s ease, fadeOut 0.5s ease 2.5s forwards;
+	    z-index: 9999;
+	}
+	
+	@keyframes slideIn {
+	    from {
+	        transform: translateX(100%);
+	        opacity: 0;
+	    }
+	    to {
+	        transform: translateX(0);
+	        opacity: 1;
+	    }
+	}
+	
+	@keyframes fadeOut {
+	    to {
+	        opacity: 0;
+	        transform: translateX(100%);
+	    }
+	}
+	
+		.cart-badge {
+    background: #ff6b35;
+    color: #fff;
+    border-radius: 50%;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: 0.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+}
+		        
+
+        @media (max-width: 968px) {
+            .menu-header h1 {
+                font-size: 2.2rem;
+            }
+
+            .filter-section {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .search-box {
+                max-width: 100%;
+            }
+
+            .menu-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 100px 4% 2rem;
+            }
+
+            .menu-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="fragments/header :: siteHeader"></div>
+
+
+<div class="container">
+<div id="toast" class="toast"
+     th:if="${cartMessage}"
+     th:text="${cartMessage}">
+</div>
+
+    <div class="menu-header">
+        <h1>Our Delicious Menu</h1>
+        <p>Handcrafted pizzas made with love and the finest ingredients</p>
+    </div>
+
+    <div class="filter-section">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search for your favorite pizza..." />
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+            </svg>
+        </div>
+        <div style="color: #999; font-size: 0.9rem;">
+            <span id="pizzaCount" th:text="${pizzas.size()}">0</span> pizzas available
+        </div>
+    </div>
+
+    <div class="menu-grid" id="menuGrid">
+        <div class="pizza-card" th:each="pizza : ${pizzas}">
+            <div class="pizza-image-wrapper">
+                <img th:if="${pizza.imageName != null}"
+                     th:src="@{'/uploads/' + ${pizza.imageName}}"
+                     th:alt="${pizza.name}"
+                     class="pizza-image" />
+                <div th:if="${pizza.imageName == null}" class="no-image-placeholder">
+                    🍕
+                </div>
+                <span th:class="${pizza.available} ? 'pizza-badge status-available' : 'pizza-badge status-unavailable'" 
+                th:text="${pizza.available} ? 'Available' : 'Unavailable'">Available</span>
+            </div>
+            <div class="pizza-content">
+                <div class="pizza-name" th:text="${pizza.name}">Margherita</div>
+                <div class="pizza-desc" th:text="${pizza.description}">
+                    Classic pizza with tomato sauce and fresh mozzarella
+                </div>
+                <div class="pizza-footer">
+                    <div class="pizza-price">
+                        ₹<span th:text="${pizza.price}">12.99</span>
+                    </div>
+                    <a th:href="@{/cart/add/{id}(id=${pizza.id})}" class="btn-add">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+                        Add to Cart
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="empty-state" style="display: none;" id="emptyState">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <h3>No pizzas found</h3>
+        <p>Try adjusting your search</p>
+    </div>
+</div>
+
+<script>
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const menuGrid = document.getElementById('menuGrid');
+    const emptyState = document.getElementById('emptyState');
+    const pizzaCount = document.getElementById('pizzaCount');
+    const allCards = menuGrid.querySelectorAll('.pizza-card');
+
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        let visibleCount = 0;
+
+        allCards.forEach(card => {
+            const name = card.querySelector('.pizza-name').textContent.toLowerCase();
+            const description = card.querySelector('.pizza-desc').textContent.toLowerCase();
+            
+            if (name.includes(searchTerm) || description.includes(searchTerm)) {
+                card.style.display = '';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        pizzaCount.textContent = visibleCount;
+
+        if (visibleCount === 0) {
+            emptyState.style.display = 'block';
+            menuGrid.style.display = 'none';
+        } else {
+            emptyState.style.display = 'none';
+            menuGrid.style.display = 'grid';
+        }
+    });
+</script>
+
+<div th:replace="fragments/footer :: siteFooter"></div>
+
+</body>
+</html>

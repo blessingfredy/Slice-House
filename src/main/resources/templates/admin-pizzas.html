@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Pizzas - Slice House Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .admin-badge {
+            background: rgba(255, 107, 53, 0.2);
+            color: #ff6b35;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 107, 53, 0.3);
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .subtitle {
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-logout {
+            background: transparent;
+            color: #999;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-logout:hover {
+            border-color: #ff6b35;
+            color: #ff6b35;
+        }
+
+        .btn-edit {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-edit:hover {
+            background: rgba(59, 130, 246, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .content-wrapper {
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.7rem 2.5rem 0.7rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 107, 53, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            border-color: #ff6b35;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .pizza-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 0.8rem;
+        }
+
+        .pizza-table thead tr {
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .pizza-table thead th {
+            padding: 1rem;
+            text-align: left;
+            color: #ff6b35;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .pizza-table thead th:first-child {
+            border-radius: 10px 0 0 10px;
+        }
+
+        .pizza-table thead th:last-child {
+            border-radius: 0 10px 10px 0;
+        }
+
+        .pizza-table tbody tr {
+            background: rgba(255, 255, 255, 0.03);
+            transition: all 0.3s ease;
+        }
+
+        .pizza-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: scale(1.01);
+        }
+
+        .pizza-table tbody td {
+            padding: 1.2rem 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .pizza-table tbody td:first-child {
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px 0 0 10px;
+        }
+
+        .pizza-table tbody td:last-child {
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 0 10px 10px 0;
+        }
+
+        .pizza-name {
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: #fff;
+        }
+
+        .pizza-description {
+            color: #999;
+            font-size: 0.9rem;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .pizza-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 107, 53, 0.3);
+        }
+
+        .price-tag {
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-available {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .status-unavailable {
+            background: rgba(156, 163, 175, 0.2);
+            color: #9ca3af;
+            border: 1px solid rgba(156, 163, 175, 0.3);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            border-radius: 10px;
+            padding: 1.2rem;
+        }
+
+        .stat-label {
+            color: #999;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        @media (max-width: 968px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            .table-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .pizza-table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .pizza-description {
+                max-width: 150px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+
+            .content-wrapper {
+                padding: 1rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="admin-container">
+    <div class="header">
+        <div class="logo-section">
+            <div>
+                <div class="logo-text">SLICE HOUSE</div>
+                <span class="admin-badge">ADMIN PANEL</span>
+            </div>
+        </div>
+        <a href="/logout" class="btn btn-logout">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Logout
+        </a>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-label">Total Pizzas</div>
+            <div class="stat-value" th:text="${pizzas.size()}">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Available</div>
+            <div class="stat-value" th:text="${availableCount}">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Unavailable</div>
+            <div class="stat-value" th:text="${unavailableCount}">0</div>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="table-header">
+            <div>
+                <h2>Pizza Management</h2>
+                <p class="subtitle">Manage your pizza menu and inventory</p>
+            </div>
+            <a href="/admin/pizzas/add" class="btn btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add New Pizza
+            </a>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search pizzas..." />
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+            </svg>
+        </div>
+
+        <table class="pizza-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Image</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="pizzaTableBody">
+                <tr th:each="pizza : ${pizzas}">
+                    <td>
+                        <div class="pizza-name" th:text="${pizza.name}">Margherita</div>
+                    </td>
+                    <td>
+                        <div class="pizza-description" th:text="${pizza.description}" th:title="${pizza.description}">
+                            Classic pizza with tomato sauce and mozzarella
+                        </div>
+                    </td>
+                    <td>
+                        <img th:if="${pizza.imageName != null}"
+                             th:src="@{'/uploads/' + ${pizza.imageName}}"
+                             class="pizza-image"
+                             th:alt="${pizza.name}" />
+                        <div th:if="${pizza.imageName == null}" style="width: 80px; height: 80px; background: rgba(255,255,255,0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #666;">
+                            No Image
+                        </div>
+                    </td>
+                    <td>
+                        <span class="price-tag">$<span th:text="${pizza.price}">12.99</span></span>
+                    </td>
+                    <td>
+                        <span th:class="${pizza.available} ? 'status-badge status-available' : 'status-badge status-unavailable'"
+                              th:text="${pizza.available} ? 'Available' : 'Unavailable'">
+                            Available
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a th:href="@{/admin/pizzas/edit/{id}(id=${pizza.id})}" class="btn btn-edit">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                                Edit
+                            </a>
+                            <a th:href="@{/admin/pizzas/delete/{id}(id=${pizza.id})}"
+                               class="btn btn-delete"
+                               onclick="return confirm('Are you sure you want to delete this pizza?')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                                Delete
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="empty-state" style="display: none;" id="emptyState">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <h3>No pizzas found</h3>
+            <p>Try adjusting your search or add a new pizza</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const tableBody = document.getElementById('pizzaTableBody');
+    const emptyState = document.getElementById('emptyState');
+    const allRows = tableBody.querySelectorAll('tr');
+
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        let visibleCount = 0;
+
+        allRows.forEach(row => {
+            const name = row.querySelector('.pizza-name').textContent.toLowerCase();
+            const description = row.querySelector('.pizza-description').textContent.toLowerCase();
+            
+            if (name.includes(searchTerm) || description.includes(searchTerm)) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        if (visibleCount === 0) {
+            emptyState.style.display = 'block';
+            tableBody.style.display = 'none';
+        } else {
+            emptyState.style.display = 'none';
+            tableBody.style.display = '';
+        }
+    });
+</script>
+
+</body>
+</html>

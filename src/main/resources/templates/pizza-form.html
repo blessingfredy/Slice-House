@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pizza.id == null} ? 'Add Pizza - Slice House Admin' : 'Edit Pizza - Slice House Admin'">Pizza Form</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 107, 53, 0.3);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 107, 53, 0.2);
+            border-color: #ff6b35;
+            transform: translateX(-3px);
+        }
+
+        .header-content h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .subtitle {
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .form-wrapper {
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 2.5rem;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            animation: slideIn 0.6s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 1.8rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 0.6rem;
+            color: #ccc;
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .required {
+            color: #ff6b35;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 107, 53, 0.3);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus {
+            border-color: #ff6b35;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .file-upload-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px dashed rgba(255, 107, 53, 0.4);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-label:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: #ff6b35;
+        }
+
+        .file-upload-label.has-file {
+            border-style: solid;
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .file-info {
+            text-align: center;
+        }
+
+        .file-name {
+            color: #ff6b35;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .preview-image {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            margin-top: 1rem;
+            border: 2px solid rgba(255, 107, 53, 0.3);
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-wrapper:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: #ff6b35;
+        }
+
+        .checkbox-label {
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .checkbox-description {
+            color: #999;
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #999;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            border-color: #ff6b35;
+            color: #ff6b35;
+        }
+
+        .price-input-wrapper {
+            position: relative;
+        }
+
+        .currency-symbol {
+            position: absolute;
+            left: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ff6b35;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        input[type="number"] {
+            padding-left: 2.5rem;
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+
+            .form-wrapper {
+                padding: 1.5rem;
+            }
+
+            .header-content h2 {
+                font-size: 1.4rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <div class="header">
+        <a href="/admin/pizzas" class="back-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+        </a>
+        <div class="header-content">
+            <h2 th:text="${pizza.id == null} ? 'Add New Pizza' : 'Edit Pizza'">Add New Pizza</h2>
+            <p class="subtitle" th:text="${pizza.id == null} ? 'Create a delicious new pizza for your menu' : 'Update pizza details'">
+                Create a delicious new pizza for your menu
+            </p>
+        </div>
+    </div>
+
+    <div class="form-wrapper">
+        <form th:action="@{/admin/pizzas/save}"
+              th:object="${pizza}"
+              method="post"
+              enctype="multipart/form-data"
+              id="pizzaForm">
+
+            <input type="hidden" th:field="*{id}" />
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="name">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+                            <path d="M12 6v6l4 2"/>
+                        </svg>
+                        Pizza Name
+                        <span class="required">*</span>
+                    </label>
+                    <input type="text" 
+                           id="name" 
+                           th:field="*{name}" 
+                           placeholder="e.g., Margherita Supreme" 
+                           required />
+                </div>
+
+                <div class="form-group">
+                    <label for="description">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                        Description
+                        <span class="required">*</span>
+                    </label>
+                    <textarea id="description" 
+                              th:field="*{description}" 
+                              placeholder="Describe your pizza's ingredients and flavors..."
+                              required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="price">
+
+                        Price
+                        <span class="required">*</span>
+                    </label>
+                    <div class="price-input-wrapper">
+                        <span class="currency-symbol">₹</span>
+                        <input type="number" 
+                               id="price" 
+                               step="0.01" 
+                               th:field="*{price}" 
+                               placeholder="0.00"
+                               min="0"
+                               required />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
+                        Pizza Image
+                    </label>
+                    <div class="file-upload-wrapper">
+                        <label for="imageFile" class="file-upload-label" id="fileLabel">
+                            <div class="file-info">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                <div>
+                                    <div style="color: #fff; font-weight: 600; margin-bottom: 0.3rem;">
+                                        Click to upload or drag and drop
+                                    </div>
+                                    <div style="color: #999; font-size: 0.85rem;">
+                                        PNG, JPG or WEBP (MAX. 5MB)
+                                    </div>
+                                    <div class="file-name" id="fileName"></div>
+                                </div>
+                            </div>
+                        </label>
+                        <input type="file" 
+                               id="imageFile" 
+                               name="imageFile" 
+                               accept="image/*" />
+                        <img id="imagePreview" class="preview-image" style="display: none;" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 11 12 14 22 4"></polyline>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                        </svg>
+                        Availability
+                    </label>
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" 
+                               id="available" 
+                               th:field="*{available}" />
+                        <div>
+                            <div class="checkbox-label">Mark as Available</div>
+                            <div class="checkbox-description">
+                                This pizza will be visible and orderable on the menu
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    <span th:text="${pizza.id == null} ? 'Create Pizza' : 'Update Pizza'">Save Pizza</span>
+                </button>
+                <a href="/admin/pizzas" class="btn btn-secondary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // File upload preview
+    const fileInput = document.getElementById('imageFile');
+    const fileLabel = document.getElementById('fileLabel');
+    const fileName = document.getElementById('fileName');
+    const imagePreview = document.getElementById('imagePreview');
+
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            fileName.textContent = file.name;
+            fileLabel.classList.add('has-file');
+
+            // Preview image
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            fileName.textContent = '';
+            fileLabel.classList.remove('has-file');
+            imagePreview.style.display = 'none';
+        }
+    });
+
+    // Drag and drop
+    fileLabel.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#ff6b35';
+        this.style.background = 'rgba(255, 107, 53, 0.1)';
+    });
+
+    fileLabel.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.style.borderColor = 'rgba(255, 107, 53, 0.4)';
+        this.style.background = 'rgba(255, 255, 255, 0.03)';
+    });
+
+    fileLabel.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.style.borderColor = 'rgba(255, 107, 53, 0.4)';
+        this.style.background = 'rgba(255, 255, 255, 0.03)';
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            const event = new Event('change', { bubbles: true });
+            fileInput.dispatchEvent(event);
+        }
+    });
+
+    // Form validation feedback
+    const form = document.getElementById('pizzaForm');
+    form.addEventListener('submit', function(e) {
+        const requiredInputs = form.querySelectorAll('[required]');
+        let isValid = true;
+
+        requiredInputs.forEach(input => {
+            if (!input.value.trim()) {
+                input.style.borderColor = '#ef4444';
+                isValid = false;
+            } else {
+                input.style.borderColor = 'rgba(255, 107, 53, 0.3)';
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+</script>
+
+</body>
+</html>
