@@ -31,7 +31,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
-                user.isEnabled(),          // 🔐 blocks unverified users
+                user.isEnabled(),   //blocks unverified users
                 true,
                 true,
                 true,

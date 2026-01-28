@@ -55,7 +55,7 @@ public SecurityFilterChain filterChain(
 
         .logout(logout -> logout
             .logoutUrl("/logout")
-            .logoutSuccessUrl("/login?logout")
+            .logoutSuccessUrl("/")
             .permitAll()
         );
 
