@@ -1,5 +1,6 @@
 package com.slice.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,10 +14,15 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import com.slice.security.CustomAuthenticationSuccessHandler;
 import com.slice.security.CustomUserDetailsService;
+import com.slice.security.OAuthUserService;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+	
+	@Autowired
+	private OAuthUserService oAuthUserService;
+
 
 @Bean
 public SecurityFilterChain filterChain(
@@ -53,6 +59,13 @@ public SecurityFilterChain filterChain(
             .failureUrl("/login?error") 
             .permitAll()
         )
+        .oauth2Login(oauth -> oauth
+        	    .loginPage("/login")
+        	    .userInfoEndpoint(userInfo ->
+                userInfo.userService(oAuthUserService)
+            )
+        	    .successHandler(successHandler)
+        	)
 
         .logout(logout -> logout
             .logoutUrl("/logout")
