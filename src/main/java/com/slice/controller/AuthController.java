@@ -1,5 +1,7 @@
 package com.slice.controller;
 
+import java.io.UnsupportedEncodingException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.slice.model.User;
 import com.slice.service.UserService;
+
+import jakarta.mail.MessagingException;
 
 @Controller
 public class AuthController {
@@ -34,7 +38,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String registerUser(@ModelAttribute("user") User user, Model model) {
+    public String registerUser(@ModelAttribute("user") User user, Model model) throws MessagingException, UnsupportedEncodingException {
 
         userService.registerCustomer(user);
 

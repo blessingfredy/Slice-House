@@ -1,5 +1,6 @@
 package com.slice.service.impl;
 
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -15,6 +16,8 @@ import com.slice.repository.UserRepository;
 import com.slice.repository.VerificationTokenRepository;
 import com.slice.service.EmailService;
 import com.slice.service.UserService;
+
+import jakarta.mail.MessagingException;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -35,7 +38,7 @@ public class UserServiceImpl implements UserService {
     private EmailService emailService;
 
     @Override
-    public User registerCustomer(User user) {
+    public User registerCustomer(User user) throws MessagingException, UnsupportedEncodingException {
 
         Role role = roleRepository.findByName("ROLE_CUSTOMER")
                 .orElseThrow(() -> new RuntimeException("ROLE_CUSTOMER not found"));
@@ -46,7 +49,7 @@ public class UserServiceImpl implements UserService {
 
         User savedUser = userRepository.save(user);
 
-        // 🔐 Generate token
+        // Generate token
         String token = UUID.randomUUID().toString();
 
         VerificationToken vt = new VerificationToken();
@@ -56,9 +59,9 @@ public class UserServiceImpl implements UserService {
 
         tokenRepository.save(vt);
 
-        // 🔗 Send email
+        // Send email
         String link = "http://localhost:8080/verify?token=" + token;
-        emailService.sendVerificationEmail(savedUser.getEmail(), link);
+        emailService.sendVerificationEmail(user,savedUser.getEmail(), link);
 
         return savedUser;
     }
