@@ -49,7 +49,8 @@ public SecurityFilterChain filterChain(
         .formLogin(form -> form
             .loginPage("/login")
             .loginProcessingUrl("/login")
-            .successHandler(successHandler)   // 🔥 role-based redirect
+            .successHandler(successHandler)
+            .failureUrl("/login?error") 
             .permitAll()
         )
 
