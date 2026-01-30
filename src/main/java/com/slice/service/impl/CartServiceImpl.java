@@ -3,6 +3,9 @@ package com.slice.service.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,21 +29,32 @@ public class CartServiceImpl implements CartService {
     @Autowired private UserRepository userRepo;
     @Autowired private HttpServletRequest request;
 
-    private String getUserEmail() {
+    private User getCurrentUser() {
 
-        if (request.getUserPrincipal() == null) {
-            throw new RuntimeException("User not authenticated");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new RuntimeException("No authenticated user");
         }
 
-        return request.getUserPrincipal().getName();
+        Object principal = auth.getPrincipal();
+
+        String email;
+
+        if (principal instanceof OAuth2User oauthUser) {
+            email = oauthUser.getAttribute("email");
+        } else {
+            email = auth.getName(); // form login
+        }
+
+        return userRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found: " + email));
     }
 
 
     private Cart getOrCreateCart() {
 
-        String email = getUserEmail();
-        User user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found: " + email));
+        User user = getCurrentUser();
 
         Cart cart = cartRepo.findByUserId(user.getId());
 
@@ -52,6 +66,7 @@ public class CartServiceImpl implements CartService {
 
         return cart;
     }
+
 
     @Override
     public void addToCart(Long pizzaId) {

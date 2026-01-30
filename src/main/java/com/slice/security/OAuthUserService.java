@@ -1,11 +1,14 @@
 package com.slice.security;
 
+import java.util.Collections;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
@@ -18,38 +21,43 @@ import com.slice.repository.UserRepository;
 @Service
 public class OAuthUserService extends DefaultOAuth2UserService {
 
-    @Autowired
-    private UserRepository userRepo;
-    
-    @Autowired
-    private RoleRepository roleRepo;
+	 @Autowired
+	    private UserRepository userRepo;
 
+	    @Autowired
+	    private RoleRepository roleRepo;
 
-    @Override
-    public OAuth2User loadUser(OAuth2UserRequest request)
-            throws OAuth2AuthenticationException {
+		@Override
+		public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
-        OAuth2User oauthUser = super.loadUser(request);
+			OAuth2User oauthUser = super.loadUser(userRequest);
 
-        String email = oauthUser.getAttribute("email");
+			String email = oauthUser.getAttribute("email");
+			String name = oauthUser.getAttribute("name");
 
-        User user = userRepo.findByEmail(email)
-        	    .orElseGet(() -> {
+			if (email == null) {
+				throw new OAuth2AuthenticationException("Email not found from Google");
+			}
 
-        	        Role customerRole = roleRepo
-        	                .findByName("ROLE_CUSTOMER")
-        	                .orElseThrow(() -> new RuntimeException("ROLE_CUSTOMER not found"));
+			User user = userRepo.findByEmail(email).orElse(null);
 
-        	        User newUser = new User();
-        	        newUser.setEmail(email);
-        	        newUser.setProvider(AuthProvider.GOOGLE);
-        	        newUser.setEnabled(true);
-        	        newUser.setRoles(Set.of(customerRole));
+			// 🔥 AUTO REGISTER
+			if (user == null) {
 
-        	        return userRepo.save(newUser);
-        	    });
+				Role customerRole = roleRepo.findByName("ROLE_CUSTOMER")
+						.orElseThrow(() -> new RuntimeException("ROLE_CUSTOMER not found"));
 
+				user = new User();
+				user.setEmail(email);
+				user.setName(name);
+				user.setProvider(AuthProvider.GOOGLE);
+				user.setEnabled(true);
+				user.setRoles(Collections.singleton(customerRole));
 
-        return oauthUser;
-    }
-}
+				userRepo.save(user);
+			}
+
+			return new DefaultOAuth2User(Collections.singleton(new SimpleGrantedAuthority("ROLE_CUSTOMER")),
+					oauthUser.getAttributes(), "email");
+		}
+	}

@@ -23,15 +23,12 @@ public class CustomAuthenticationSuccessHandler
             Authentication authentication)
             throws IOException, ServletException {
 
-        System.out.println("🔥 SUCCESS HANDLER HIT 🔥");
-
         Collection<? extends GrantedAuthority> authorities =
                 authentication.getAuthorities();
 
         for (GrantedAuthority authority : authorities) {
 
             String role = authority.getAuthority();
-            System.out.println("🔥 ROLE FOUND: " + role);
 
             if ("ROLE_ADMIN".equals(role)) {
                 response.sendRedirect("/admin/pizzas");
