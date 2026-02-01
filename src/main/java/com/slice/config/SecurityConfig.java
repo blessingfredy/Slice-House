@@ -40,7 +40,8 @@ public SecurityFilterChain filterChain(
             .requestMatchers(
                 "/", "/home", "/menu", "/about", "/contact",
                 "/register", "/verify", "/login",
-                "/css/**", "/images/**", "/uploads/**"
+                "/css/**", "/images/**", "/uploads/**", "/forgot-password",
+                "/reset-password"
             ).permitAll()
 
             .requestMatchers("/cart/**", "/orders/**", "/checkout/**")
